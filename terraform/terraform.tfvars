@@ -6,5 +6,5 @@ vm_name          = "vm-windows-01"
 vm_size          = "Standard_B2s"
 admin_username   = "azureuser"
 create_public_ip = true
-rdp_allowed_cidr = "81.111.72.124/32"
+rdp_allowed_cidr = "80.187.126.128/32"
 
