@@ -19,6 +19,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Verify admin password secret
+        run: |
+          if [ -z "${{ secrets.VM_ADMIN_PASSWORD }}" ]; then
+            echo "ERROR: Secret VM_ADMIN_PASSWORD is empty or missing." >&2
+            exit 1
+          fi
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -26,19 +33,21 @@ jobs:
 
       - name: Terraform Init
         working-directory: ./terraform
-        run: terraform init
+        run: terraform init -no-color
 
       - name: Terraform Plan
         working-directory: ./terraform
+        env:
+          TF_VAR_admin_password: ${{ secrets.VM_ADMIN_PASSWORD }}
         run: |
-          terraform plan \
-            -var-file="terraform.tfvars" \
-            -var="admin_password=${{ secrets.VM_ADMIN_PASSWORD }}"
+          terraform plan -no-color \
+            -var-file="terraform.tfvars"
 
       - name: Terraform Apply (main only)
         if: github.ref == 'refs/heads/main'
         working-directory: ./terraform
+        env:
+          TF_VAR_admin_password: ${{ secrets.VM_ADMIN_PASSWORD }}
         run: |
-          terraform apply -auto-approve \
-            -var-file="terraform.tfvars" \
-            -var="admin_password=${{ secrets.VM_ADMIN_PASSWORD }}"
+          terraform apply -auto-approve -no-color \
+            -var-file="terraform.tfvars"
